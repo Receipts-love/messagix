@@ -2,7 +2,6 @@ package messagix
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/0xzer/messagix/socket"
@@ -29,12 +28,12 @@ func (m *Messages) SendReaction(threadId int64, messageId string, reaction strin
 
 	payload, err := tskm.FinalizePayload()
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("messagix: %v", err))
 	}
 	
 	packetId, err := m.client.socket.makeLSRequest(payload, 3)
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("messagix: %v", err))
 	}
 
 
@@ -59,12 +58,12 @@ func (m *Messages) DeleteMessage(messageId string, deleteForMeOnly bool) (*table
 
 	payload, err := tskm.FinalizePayload()
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("messagix: %v", err))
 	}
 	
 	packetId, err := m.client.socket.makeLSRequest(payload, 3)
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("messagix: %v", err))
 	}
 
 	resp := m.client.socket.responseHandler.waitForPubResponseDetails(packetId)

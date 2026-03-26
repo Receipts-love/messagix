@@ -21,12 +21,12 @@ func (t *Threads) FetchMessages(ThreadId int64, ReferenceTimestampMs int64, Refe
 
 	payload, err := tskm.FinalizePayload()
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("messagix: %v", err))
 	}
 
 	packetId, err := t.client.socket.makeLSRequest(payload, 3)
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("messagix: %v", err))
 	}
 
 

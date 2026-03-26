@@ -2,6 +2,7 @@ package messagix
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"github.com/0xzer/messagix/lightspeed"
 	"github.com/0xzer/messagix/methods"
@@ -41,27 +42,27 @@ func (s *Socket) handleBinaryMessage(data []byte) {
 func (s *Socket) handleReadyEvent(data *Event_Ready) {
 	appSettingPublishJSON, err := s.newAppSettingsPublishJSON(s.client.configs.VersionId)
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("messagix: %v", err))
 	}
 
 	packetId, err := s.sendPublishPacket(LS_APP_SETTINGS, appSettingPublishJSON, &packets.PublishPacket{QOSLevel: packets.QOS_LEVEL_1}, s.SafePacketId())
 	if err != nil {
-		log.Fatalf("failed to send APP_SETTINGS publish packet: %e", err)
+		panic(fmt.Sprintf("failed to send APP_SETTINGS publish packet: %e", err))
 	}
 
 	appSettingAck := s.responseHandler.waitForPubACKDetails(packetId)
 	if appSettingAck == nil {
-		log.Fatalf("failed to get pubAck for packetId: %d", appSettingAck.PacketId)
+		panic(fmt.Sprintf("failed to get pubAck for packetId: %d", appSettingAck.PacketId))
 	}
 
 	_, err = s.sendSubscribePacket(LS_FOREGROUND_STATE, packets.QOS_LEVEL_0, true)
 	if err != nil {
-		log.Fatalf("failed to subscribe to ls_foreground_state: %e", err)
+		panic(fmt.Sprintf("failed to subscribe to ls_foreground_state: %e", err))
 	}
 
 	_, err = s.sendSubscribePacket(LS_RESP, packets.QOS_LEVEL_0, true)
 	if err != nil {
-		log.Fatalf("failed to subscribe to ls_resp: %e", err)
+		panic(fmt.Sprintf("failed to subscribe to ls_resp: %e", err))
 	}
 
 	
@@ -108,25 +109,25 @@ func (s *Socket) handleReadyEvent(data *Event_Ready) {
 
 	payload, err := tskm.FinalizePayload()
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("messagix: %v", err))
 	}
 
 	s.client.Logger.Debug().Any("data", string(payload)).Msg("Sync groups tasks")
 	packetId, err = s.makeLSRequest(payload, 3)
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("messagix: %v", err))
 	}
 
 	resp := s.responseHandler.waitForPubResponseDetails(packetId)
 	if resp == nil {
-		log.Fatalf("failed to receive response from task 145 request")
+		panic(fmt.Sprintf("failed to receive response from task 145 request"))
 	}
 
 	s.client.Logger.Info().Any("syncgroup", resp.Table.LSUpsertSyncGroupThreadsRange).Any("threads", resp.Table.LSDeleteThenInsertThread).Msg("145 RESP.")
 
 	err = s.client.Account.ReportAppState(table.FOREGROUND)
 	if err != nil {
-		log.Fatalf("failed to report app state to foreground (active): %e", err)
+		panic(fmt.Sprintf("failed to report app state to foreground (active): %e", err))
 	}
 
 	
@@ -135,7 +136,7 @@ func (s *Socket) handleReadyEvent(data *Event_Ready) {
 	})
 
 	if err != nil {
-		log.Fatalf("EnsureSyncedSocket failed to sync db 1: %e", err)
+		panic(fmt.Sprintf("EnsureSyncedSocket failed to sync db 1: %e", err))
 	}
 
 	data.client = s.client

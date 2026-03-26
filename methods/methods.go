@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"log"
+	"fmt"
 	"math/rand"
 	"regexp"
 	"strconv"
@@ -79,7 +79,7 @@ func GenerateTraceId() string {
 	uuidHex := strings.ReplaceAll(uuid.NewString(), "-", "")
 	decodedHex, err := hex.DecodeString(uuidHex)
 	if err != nil {
-		log.Fatalf("failed to decode traceId string: %s", err)
+		panic(fmt.Sprintf("failed to decode traceId string: %s", err))
 	}
 	return "#" + base64.RawURLEncoding.EncodeToString(decodedHex)
 }

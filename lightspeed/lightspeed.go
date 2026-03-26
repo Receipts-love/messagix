@@ -2,7 +2,7 @@ package lightspeed
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 )
 
 type StepType int
@@ -153,12 +153,12 @@ func DependenciesToMap(dep interface{}) map[string]string {
 	var converted []Dependency
 	b, err := json.Marshal(dep)
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("messagix: %v", err))
 	}
 
 	err  = json.Unmarshal(b, &converted)
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("messagix: %v", err))
 	}
 
 	depMap := make(map[string]string, 0)

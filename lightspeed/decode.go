@@ -3,7 +3,6 @@ package lightspeed
 import (
 	"fmt"
 	"log"
-	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -62,13 +61,13 @@ func (ls *LightSpeedDecoder) Decode(data interface{}) interface{} {
 		key, ok := stepData[0].(float64)
 		if !ok {
 			log.Println(stepData...)
-			os.Exit(1)
+			panic("messagix: fatal error")
 		}
 
 		shouldStore, ok := stepData[1].(float64)
 		if !ok {
 			log.Println(stepData...)
-			os.Exit(1)
+			panic("messagix: fatal error")
 		}
 
 		ls.StatementReferences[int(key)] = int64(shouldStore)
@@ -124,7 +123,7 @@ func (ls *LightSpeedDecoder) Decode(data interface{}) interface{} {
 		log.Println("got unknown step type:", stepType)
 		log.Println(stepData...)
 		log.Println(s...)
-		os.Exit(1)
+		panic("messagix: fatal error")
 	}
 
 	return nil
@@ -222,7 +221,7 @@ func (ls *LightSpeedDecoder) handleStoredProcedure(referenceName string, data []
 			newDepInstance.Field(i).SetFloat(floatVal)
 		default:
 			log.Println("invalid kind:", kind, val, valType)
-			os.Exit(1)
+			panic("messagix: fatal error")
 		}
 	}
 	newSlice := reflect.Append(depField, newDepInstance)

@@ -3,7 +3,6 @@ package messagix
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"github.com/0xzer/messagix/cookies"
 	"github.com/0xzer/messagix/socket"
@@ -52,12 +51,12 @@ func (a *Account) GetContacts(limit int64) ([]table.LSVerifyContactRowExists, er
 
 	payload, err := tskm.FinalizePayload()
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("messagix fatal: %w", err)
 	}
 
 	packetId, err := a.client.socket.makeLSRequest(payload, 3)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("messagix fatal: %w", err)
 	}
 
 	resp := a.client.socket.responseHandler.waitForPubResponseDetails(packetId)
@@ -78,12 +77,12 @@ func (a *Account) GetContactsFull(contactIds []int64) ([]table.LSDeleteThenInser
 
 	payload, err := tskm.FinalizePayload()
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("messagix fatal: %w", err)
 	}
 
 	packetId, err := a.client.socket.makeLSRequest(payload, 3)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("messagix fatal: %w", err)
 	}
 
 	resp := a.client.socket.responseHandler.waitForPubResponseDetails(packetId)
@@ -100,12 +99,12 @@ func (a *Account) ReportAppState(state table.AppState) error {
 
 	payload, err := tskm.FinalizePayload()
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("messagix fatal: %w", err)
 	}
 
 	packetId, err := a.client.socket.makeLSRequest(payload, 3)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("messagix fatal: %w", err)
 	}
 
 

@@ -282,7 +282,7 @@ func (m *ModuleParser) crawlJavascriptFile(href string) (bool, error) {
 	}
 
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("messagix: %v", err))
 	}
 	
 	versionMatches := versionPattern.FindStringSubmatch(string(jsContent))
@@ -329,7 +329,7 @@ func (m *ModuleParser) handleModule(data []interface{}) error {
 		case "HasteSupportData":
 			log.Println("got haste support data!")
 			m.client.Logger.Debug().Any("data", modData).Msg("Got haste support data")
-			os.Exit(1)
+			panic("messagix: fatal error")
 		}
 		*/
 	}

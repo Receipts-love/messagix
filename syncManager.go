@@ -3,7 +3,6 @@ package messagix
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"github.com/0xzer/messagix/graphql"
 	"github.com/0xzer/messagix/methods"
 	"github.com/0xzer/messagix/socket"
@@ -186,7 +185,7 @@ func (sm *SyncManager) getSyncParams(ch socket.SyncChannel) interface{} {
 	case socket.Contact:
 		return sm.syncParams.Contact
 	default:
-		log.Fatalf("Unknown syncChannel: %d", ch)
+		panic(fmt.Sprintf("Unknown syncChannel: %d", ch))
 		return nil
 	}
 }
