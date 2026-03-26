@@ -48,10 +48,17 @@ func (m *ModuleParser) handleConfigData(configData []interface{}, reflectedMs re
 	if len(configData) < 4 {
 		return nil
 	}
-	
-	configName := configData[0].(string)
+
+	configName, ok := configData[0].(string)
+	if !ok {
+		return nil
+	}
 	config := configData[2]
-	configId := int(configData[3].(float64))
+	configIdFloat, ok := configData[3].(float64)
+	if !ok {
+		return nil
+	}
+	configId := int(configIdFloat)
 
 	if configId <= 0 {
 		return nil
@@ -79,13 +86,24 @@ func (m *ModuleParser) handleConfigData(configData []interface{}, reflectedMs re
 func (m *ModuleParser) handleRequire(modName string, data []interface{}) error {
 	switch modName {
 		case "ssjs":
-			//reflectedMs := reflect.ValueOf(&SchedulerJSRequired).Elem()
 			for _, requireData := range data {
-				d := requireData.([]interface{})
-				requireType := d[0].(string)
+				d, ok := requireData.([]interface{})
+				if !ok || len(d) == 0 {
+					continue
+				}
+				requireType, ok := d[0].(string)
+				if !ok {
+					continue
+				}
 				switch requireType {
 					case "CometPlatformRootClient":
-						moduleData := d[3].([]interface{})
+						if len(d) < 4 {
+							continue
+						}
+						moduleData, ok := d[3].([]interface{})
+						if !ok {
+							continue
+						}
 						for _, v := range moduleData {
 							requestsMap, ok := v.([]interface{})
 							if !ok {
@@ -109,19 +127,33 @@ func (m *ModuleParser) handleRequire(modName string, data []interface{}) error {
 
 						}
 					case "RelayPrefetchedStreamCache":
-						moduleData := d[3].([]interface{})
-						//method := d[1].(string)
-						//dependencies := d[2].(string)
-						parserFunc := m.parseGraphMethodName(moduleData[0].(string))
-						graphQLData := moduleData[1].(map[string]interface{})
+						if len(d) < 4 {
+							continue
+						}
+						moduleData, ok := d[3].([]interface{})
+						if !ok {
+							continue
+						}
+						if len(moduleData) < 2 {
+							continue
+						}
+						parserFuncName, ok := moduleData[0].(string)
+						if !ok {
+							continue
+						}
+						parserFunc := m.parseGraphMethodName(parserFuncName)
+						graphQLData, ok := moduleData[1].(map[string]interface{})
+						if !ok {
+							continue
+						}
 						boxData, ok := graphQLData["__bbox"].(map[string]interface{})
 						if !ok {
-							return fmt.Errorf("could not find __bbox in graphQLData map for parser func: %s", parserFunc)
+							continue
 						}
 
 						result, ok := boxData["result"]
 						if !ok {
-							return fmt.Errorf("could not find result in __bbox for parser func: %s", parserFunc)
+							continue
 						}
 
 						if parserFunc == "LSPlatformGraphQLLightspeedRequestQuery" || parserFunc == "LSPlatformGraphQLLightspeedRequestForIGDQuery" {
@@ -226,9 +258,15 @@ func (m *ModuleParser) SSJSHandle(data interface{}) error {
 		}
 		switch k {
 			case "__bbox":
-				boxMap := v.(map[string]interface{})
+				boxMap, ok := v.(map[string]interface{})
+				if !ok {
+					continue
+				}
 				for boxKey, boxData := range boxMap {
-					boxDataArr := boxData.([]interface{})
+					boxDataArr, ok := boxData.([]interface{})
+					if !ok {
+						continue
+					}
 					switch boxKey {
 					case "require":
 						err = m.handleRequire("ssjs", boxDataArr)
@@ -247,7 +285,10 @@ func (m *ModuleParser) handleDefine(modName string, data []interface{}) error {
 	switch modName {
 		case "ssjs":
 			for _, child := range data {
-				configData := child.([]interface{})
+				configData, ok := child.([]interface{})
+				if !ok {
+					continue
+				}
 				err := m.handleConfigData(configData, reflectedMs)
 				if err != nil {
 					return err
